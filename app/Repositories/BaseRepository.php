@@ -164,4 +164,18 @@ abstract class BaseRepository
 
         return $query->where($column,$value);
     }
+    /**
+     * @param array $when
+     *
+     * @throws \Exception
+     *
+     * @return bool|mixed|null
+     */
+    public function when($bool,$callback)
+    {
+        $query = $this->allQuery();
+
+        return $query->when($bool,$callback);
+    }
+    
 }

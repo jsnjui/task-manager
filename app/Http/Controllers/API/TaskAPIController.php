@@ -28,7 +28,22 @@ class TaskAPIController extends AppBaseController
      */
     public function index(Request $request): JsonResponse
     {
-        $tasks = $this->taskRepository->where('user_id',Auth::id())->paginate($request->get('limit',100));
+        $tasks = $this->taskRepository
+        ->when($request->has('title'),function($q) use($request){
+           return $q->where('title','like','%'.$request->get('title','').'%');
+        })
+        ->when($request->has('status'),function($q) use($request){
+            return $q->where('status',$request->get('status',''));
+        })
+        ->when($request->has('start_date'), function ($q) use($request){
+            $q->whereDate('due_date','>=',$request->get('start_date'));
+        })
+        ->when($request->has('end_date'), function ($q) use($request){
+            $q->whereDate('due_date','<=',$request->get('end_date'));
+        })
+        ->where('user_id',Auth::id())
+        
+        ->paginate($request->get('limit',100));
 
         return $this->sendResponse($tasks->toArray(), 'Tasks retrieved successfully');
     }
